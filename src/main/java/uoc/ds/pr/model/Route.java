@@ -80,4 +80,16 @@ public class Route implements Comparable<Route> {
             }
         }
     }
+
+    public double getKms() {
+        return 0;
+    }
+
+    public Port getSrcPort() {
+        return null;
+    }
+
+    public Port getDstPort() {
+        return null;
+    }
 }

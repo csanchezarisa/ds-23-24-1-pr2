@@ -12,7 +12,7 @@ import uoc.ds.pr.util.DSLinkedList;
 import uoc.ds.pr.util.OrderedVector;
 
 
-public class ShippingLineImpl implements ShippingLinePR2 {
+public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     private DSArray<Ship> ships;
     private DSArray<Route> routes;
@@ -26,7 +26,7 @@ public class ShippingLineImpl implements ShippingLinePR2 {
 
 
 
-    public ShippingLineImpl() {
+    public ShippingLinePR2Impl() {
         ships = new DSArray<>(MAX_NUM_SHIPS);
         routes = new DSArray<>(MAX_NUM_ROUTES);
         clients = new DSLinkedList<>(Client.CMP);
@@ -54,7 +54,6 @@ public class ShippingLineImpl implements ShippingLinePR2 {
     }
 
 
-    @Override
     public void addRoute(String id, String beginningPort, String arrivalPort) {
         Route route = getRoute(id);
         if (route == null) {

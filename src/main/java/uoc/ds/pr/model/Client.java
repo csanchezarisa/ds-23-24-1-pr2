@@ -3,6 +3,7 @@ package uoc.ds.pr.model;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
+import uoc.ds.pr.ShippingLinePR2;
 
 import java.util.Comparator;
 
@@ -98,5 +99,13 @@ public class Client implements Comparable<Client> {
     @Override
     public int compareTo(Client o) {
         return this.id.compareTo(o.id);
+    }
+
+    public ShippingLinePR2.LoyaltyLevel getLevel() {
+        return ShippingLinePR2.LoyaltyLevel.BRONZE;
+    }
+
+    public int numOrders() {
+        return 0;
     }
 }
