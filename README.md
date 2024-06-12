@@ -1,8 +1,8 @@
 ## PR1
 
 ## Author
-- #name
-- #email
+- Cristóbal Sánchez Arisa  
+- csanchezarisa@uoc.edu
 
 ## 
 # DB-example
