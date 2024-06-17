@@ -1,5 +1,6 @@
 package uoc.ds.pr;
 
+import java.util.Comparator;
 import java.util.Date;
 
 import edu.uoc.ds.adt.nonlinear.HashTable;
@@ -16,11 +17,14 @@ import uoc.ds.pr.util.Utils;
 
 public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
+    private static final int MAX = 15;
+
     private DSArray<Ship> ships;
     private HashTable<String, Route> routes;
     private DSLinkedList<Client> clients;
     private DSLinkedList<Voyage> voyages;
     private HashTable<String, Port> ports;
+    private DSLinkedList<Category> categories;
 
     private OrderedVector<Client>  bestClient;
 	private OrderedVector<Route> bestRoute;
@@ -35,6 +39,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         clients = new DSLinkedList<>(Client.CMP);
         voyages = new DSLinkedList<>(Voyage.CMP);
         ports = new HashTable<>();
+        categories = new DSLinkedList<>(Comparator.comparing(Category::getId));
         bestClient = new OrderedVector<>(MAX_CLIENTS, Client.CMP_V);
         bestRoute = new OrderedVector<>(MAX_NUM_ROUTES, Route.CMP_V);
     }
@@ -103,7 +108,13 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void addCategory(String id, String name) {
-
+        Category category = getCategory(id);
+        if (category != null) {
+            category.update(name);
+            return;
+        }
+        category = new Category(id, name);
+        categories.insertEnd(category);
     }
 
     @Override
@@ -425,7 +436,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public int numCategories() {
-        return 0;
+        return categories.size();
     }
 
     @Override
@@ -450,6 +461,6 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Category getCategory(String id) {
-        return null;
+        return categories.get(new Category(id));
     }
 }
