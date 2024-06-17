@@ -326,7 +326,16 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Product> getProductsByCategory(String categoryId) throws CategoryNotFoundException, NoProductsException {
-        return null;
+        final Category category = getCategory(categoryId);
+        if (category == null) {
+            throw new CategoryNotFoundException();
+        }
+
+        if (category.numProducts() < 1) {
+            throw new NoProductsException();
+        }
+
+        return category.products();
     }
 
     @Override

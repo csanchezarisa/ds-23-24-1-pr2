@@ -2,6 +2,7 @@ package uoc.ds.pr.model;
 
 import edu.uoc.ds.adt.nonlinear.Dictionary;
 import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
+import edu.uoc.ds.traversal.Iterator;
 
 import java.util.Objects;
 
@@ -20,7 +21,7 @@ public class Category {
     public Category(String id) {
         this.id = id;
         this.name = null;
-        this.products = null;
+        products = new DictionaryAVLImpl<>();
     }
 
     public void update(String name) {
@@ -53,6 +54,10 @@ public class Category {
 
     public int numProducts() {
         return products.size();
+    }
+
+    public Iterator<Product> products() {
+        return products.values();
     }
 
     @Override
