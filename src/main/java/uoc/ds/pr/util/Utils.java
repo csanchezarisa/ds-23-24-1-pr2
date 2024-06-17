@@ -2,6 +2,7 @@ package uoc.ds.pr.util;
 
 import edu.uoc.ds.traversal.Iterator;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public final class Utils {
@@ -25,5 +26,15 @@ public final class Utils {
             }
         }
         return false;
+    }
+
+    public static <E> Optional<E> find(Iterator<E> it, Predicate<E> predicate) {
+        while (it.hasNext()) {
+            E e = it.next();
+            if (predicate.test(e)) {
+                return Optional.of(e);
+            }
+        }
+        return Optional.empty();
     }
 }

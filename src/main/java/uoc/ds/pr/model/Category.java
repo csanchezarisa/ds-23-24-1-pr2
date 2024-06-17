@@ -1,20 +1,26 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.nonlinear.Dictionary;
+import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
+
 import java.util.Objects;
 
 public class Category {
 
     private String id;
     private String name;
+    private final Dictionary<String, Product> products;
 
     public Category(String id, String name) {
         this.id = id;
         this.name = name;
+        products = new DictionaryAVLImpl<>();
     }
 
     public Category(String id) {
         this.id = id;
         this.name = null;
+        this.products = null;
     }
 
     public void update(String name) {
@@ -35,6 +41,18 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void addProduct(Product product) {
+        products.put(product.getId(), product);
+    }
+
+    public void deleteProduct(String productId) {
+        products.delete(productId);
+    }
+
+    public int numProducts() {
+        return products.size();
     }
 
     @Override

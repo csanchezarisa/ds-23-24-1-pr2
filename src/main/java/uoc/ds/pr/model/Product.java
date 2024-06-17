@@ -14,6 +14,12 @@ public class Product {
         this.category = category;
     }
 
+    public void update(String name, String description, Category category) {
+        this.name = name;
+        this.description = description;
+        this.category = category;
+    }
+
     public String getId() {
         return id;
     }

@@ -1,5 +1,11 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.nonlinear.Dictionary;
+import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
+
+import java.util.LinkedList;
+import java.util.List;
+
 public class Ship {
 
     private String id;
@@ -8,6 +14,7 @@ public class Ship {
     private int nCabins2;
     private int nCabins4;
     private int nParkingLots;
+    private final List<Product> products;
 
 
     private int unLoadTimeinMinutes;
@@ -16,6 +23,7 @@ public class Ship {
     public Ship(String id, String name, int nArmChairs, int nCabins2, int nCabins4, int nParkingLots, int unLoadTimeinMinutes) {
         setId(id);
         update(name, nArmChairs, nCabins2, nCabins4, nParkingLots, unLoadTimeinMinutes);
+        products = new LinkedList<>();
     }
 
 
@@ -83,6 +91,18 @@ public class Ship {
 
     public void setnParkingLots(int nParkingLots) {
         this.nParkingLots = nParkingLots;
+    }
+
+    public void addProduct(Product product) {
+        products.add(product);
+    }
+
+    public void deleteProduct(Product product) {
+        products.remove(product);
+    }
+
+    public int numProducts() {
+        return products.size();
     }
 
 

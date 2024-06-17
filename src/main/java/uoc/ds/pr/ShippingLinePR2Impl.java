@@ -25,6 +25,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     private DSLinkedList<Voyage> voyages;
     private HashTable<String, Port> ports;
     private DSLinkedList<Category> categories;
+    private HashTable<String, Product> products;
 
     private OrderedVector<Client>  bestClient;
 	private OrderedVector<Route> bestRoute;
@@ -40,6 +41,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         voyages = new DSLinkedList<>(Voyage.CMP);
         ports = new HashTable<>();
         categories = new DSLinkedList<>(Comparator.comparing(Category::getId));
+        products = new HashTable<>();
         bestClient = new OrderedVector<>(MAX_CLIENTS, Client.CMP_V);
         bestRoute = new OrderedVector<>(MAX_NUM_ROUTES, Route.CMP_V);
     }
@@ -119,7 +121,20 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void addProduct(String id, String name, String description, String idCategory) throws CategoryNotFoundException {
+        Category category = getCategory(idCategory);
+        if (category == null) {
+            throw new CategoryNotFoundException();
+        }
+        category.deleteProduct(id);
 
+        Product product = getProduct(id);
+        if (product != null) {
+            product.update(name, description, category);
+        } else {
+            product = new Product(id, name, description, category);
+            products.put(id, product);
+        }
+        category.addProduct(product);
     }
 
 
@@ -441,17 +456,17 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public int numProducts() {
-        return 0;
+        return products.size();
     }
 
     @Override
     public int numProducts(String categoryId) {
-        return 0;
+        return getCategory(categoryId).numProducts();
     }
 
     @Override
     public int numProductsByShip(String shipId) {
-        return 0;
+        return getShip(shipId).numProducts();
     }
 
     @Override
@@ -462,5 +477,9 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     @Override
     public Category getCategory(String id) {
         return categories.get(new Category(id));
+    }
+
+    public Product getProduct(String id) {
+        return products.get(id);
     }
 }
