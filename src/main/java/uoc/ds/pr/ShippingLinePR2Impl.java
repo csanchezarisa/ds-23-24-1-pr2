@@ -2,6 +2,7 @@ package uoc.ds.pr;
 
 import java.util.Date;
 
+import edu.uoc.ds.adt.nonlinear.HashTable;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
@@ -10,14 +11,16 @@ import uoc.ds.pr.model.*;
 import uoc.ds.pr.util.DSArray;
 import uoc.ds.pr.util.DSLinkedList;
 import uoc.ds.pr.util.OrderedVector;
+import uoc.ds.pr.util.Utils;
 
 
 public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     private DSArray<Ship> ships;
-    private DSArray<Route> routes;
+    private HashTable<String, Route> routes;
     private DSLinkedList<Client> clients;
     private DSLinkedList<Voyage> voyages;
+    private HashTable<String, Port> ports;
 
     private OrderedVector<Client>  bestClient;
 	private OrderedVector<Route> bestRoute;
@@ -28,9 +31,10 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     public ShippingLinePR2Impl() {
         ships = new DSArray<>(MAX_NUM_SHIPS);
-        routes = new DSArray<>(MAX_NUM_ROUTES);
+        routes = new HashTable<>();
         clients = new DSLinkedList<>(Client.CMP);
         voyages = new DSLinkedList<>(Voyage.CMP);
+        ports = new HashTable<>();
         bestClient = new OrderedVector<>(MAX_CLIENTS, Client.CMP_V);
         bestRoute = new OrderedVector<>(MAX_NUM_ROUTES, Route.CMP_V);
     }
@@ -50,20 +54,28 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void addRoute(String id, String beginningPort, String arrivalPort, double kms) throws SrcPortNotFoundException, DstPortNotFoundException, RouteAlreadyExistException {
+        final Port srcPort = getPort(beginningPort);
+        if (srcPort == null) {
+            throw new SrcPortNotFoundException();
+        }
 
-    }
+        final Port dstPort = getPort(arrivalPort);
+        if (dstPort == null) {
+            throw new DstPortNotFoundException();
+        }
 
+        if (Utils.anyMatch(routes.values(), r -> r.getDstPort().equals(dstPort) && r.getSrcPort().equals(srcPort))) {
+            throw new RouteAlreadyExistException();
+        }
 
-    public void addRoute(String id, String beginningPort, String arrivalPort) {
         Route route = getRoute(id);
         if (route == null) {
-            route = new Route(id, beginningPort, arrivalPort);
+            route = new Route(id, srcPort, dstPort, kms);
             this.routes.put(id, route);
         }
         else {
-            route.update(beginningPort, arrivalPort);
+            route.update(srcPort, dstPort);
         }
-
     }
 
     public void addClient(String id, String name, String surname) {
@@ -76,6 +88,27 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         else {
             client.update(name, surname);
         }
+    }
+
+    @Override
+    public void addPort(String id, String name, String imageUrl, String description) {
+        Port port = getPort(id);
+        if (port != null) {
+            port.update(imageUrl, description, name);
+            return;
+        }
+        port = new Port(id, imageUrl, description, name);
+        ports.put(id, port);
+    }
+
+    @Override
+    public void addCategory(String id, String name) {
+
+    }
+
+    @Override
+    public void addProduct(String id, String name, String description, String idCategory) throws CategoryNotFoundException {
+
     }
 
 
@@ -265,61 +298,6 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         return clientLinkedList;
     }
 
-    /***********************************************************************************/
-    /******************** AUX OPERATIONS  **********************************************/
-    /***********************************************************************************/
-
-
-    public Ship getShip(String id) {
-        return ships.get(id);
-    }
-
-    @Override
-    public Port getPort(String id) {
-        return null;
-    }
-
-    public Client getClient(String id) {
-        return clients.get(new Client(id));
-    }
-
-    public Route getRoute(String idRoute) {
-        return routes.get(idRoute);
-    }
-
-    public Voyage getVoyage(String id) {
-        return voyages.get(new Voyage(id));
-    }
-
-    public int numShips() {
-        return ships.size();
-    }
-
-    public int numRoutes() {
-        return routes.size();
-    }
-
-    public int numClients() {
-        return clients.size();
-    }
-
-    public int numVoyages() {return voyages.size(); }
-
-    @Override
-    public void addPort(String id, String name, String imageUrl, String description) {
-
-    }
-
-    @Override
-    public void addCategory(String id, String name) {
-
-    }
-
-    @Override
-    public void addProduct(String id, String name, String description, String idCategory) throws CategoryNotFoundException {
-
-    }
-
     @Override
     public Iterator<Product> getProductsByCategory(String categoryId) throws CategoryNotFoundException, NoProductsException {
         return null;
@@ -370,6 +348,46 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         return null;
     }
 
+    /***********************************************************************************/
+    /******************** AUX OPERATIONS  **********************************************/
+    /***********************************************************************************/
+
+
+    public Ship getShip(String id) {
+        return ships.get(id);
+    }
+
+    @Override
+    public Port getPort(String id) {
+        return ports.get(id);
+    }
+
+    public Client getClient(String id) {
+        return clients.get(new Client(id));
+    }
+
+    public Route getRoute(String idRoute) {
+        return routes.get(idRoute);
+    }
+
+    public Voyage getVoyage(String id) {
+        return voyages.get(new Voyage(id));
+    }
+
+    public int numShips() {
+        return ships.size();
+    }
+
+    public int numRoutes() {
+        return routes.size();
+    }
+
+    public int numClients() {
+        return clients.size();
+    }
+
+    public int numVoyages() {return voyages.size(); }
+
     @Override
     public Route getRoute(String idBeginningPort, String idArrivalPort) throws NoRouteException, SamePortException {
         return null;
@@ -402,7 +420,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public int numPorts() {
-        return 0;
+        return ports.size();
     }
 
     @Override

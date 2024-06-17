@@ -10,22 +10,24 @@ import java.util.Comparator;
 public class Route implements Comparable<Route> {
     public static final Comparator<Route> CMP_V = (r1, r2) -> Integer.compare(r1.voyages.size(), r2.voyages.size());
     private String id;
-    private String beginningPort;
-    private String arrivalPort;
+    private Port beginningPort;
+    private Port arrivalPort;
+    private double kms;
     List<Voyage> voyages;
 
 
-    public Route(String id, String beginningPort, String arrivalPort) {
+    public Route(String id, Port beginningPort, Port arrivalPort, double kms) {
         this.setId(id);
-        this.setBeginningPort(beginningPort);
-        this.setArrivalPort(arrivalPort);
+        this.beginningPort = beginningPort;
+        this.arrivalPort = arrivalPort;
+        this.kms = kms;
         voyages = new LinkedList<>();
     }
 
 
-    public void update(String name, String description) {
-        this.setBeginningPort(name);
-        this.setArrivalPort(description);
+    public void update(Port beginningPort, Port arrivalPort) {
+        this.beginningPort = beginningPort;
+        this.arrivalPort = arrivalPort;
     }
 
     public String getId() {
@@ -36,22 +38,6 @@ public class Route implements Comparable<Route> {
         this.id = id;
     }
 
-    public String getBeginningPort() {
-        return beginningPort;
-    }
-
-    public void setBeginningPort(String beginningPort) {
-        this.beginningPort = beginningPort;
-    }
-
-    public String getArrivalPort() {
-        return arrivalPort;
-    }
-
-    public void setArrivalPort(String arrivalPort) {
-        this.arrivalPort = arrivalPort;
-    }
-
     @Override
     public int compareTo(Route o) {
         return this.id.compareTo(o.id);
@@ -59,7 +45,7 @@ public class Route implements Comparable<Route> {
 
     @Override
     public String toString() {
-        return this.getBeginningPort()+"-"+this.getArrivalPort();
+        return this.getSrcPort()+"-"+this.getDstPort();
     }
 
     public void addVoyage(Voyage voyage) {
@@ -82,14 +68,14 @@ public class Route implements Comparable<Route> {
     }
 
     public double getKms() {
-        return 0;
+        return this.kms;
     }
 
     public Port getSrcPort() {
-        return null;
+        return beginningPort;
     }
 
     public Port getDstPort() {
-        return null;
+        return arrivalPort;
     }
 }
