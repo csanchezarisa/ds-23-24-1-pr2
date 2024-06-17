@@ -1,10 +1,13 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.helpers.Position;
 import edu.uoc.ds.adt.nonlinear.Dictionary;
 import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
-
-import java.util.LinkedList;
-import java.util.List;
+import edu.uoc.ds.adt.sequential.LinkedList;
+import edu.uoc.ds.adt.sequential.List;
+import edu.uoc.ds.traversal.Iterator;
+import uoc.ds.pr.exceptions.ProductNotInMenuException;
+import uoc.ds.pr.util.Utils;
 
 public class Ship {
 
@@ -94,15 +97,21 @@ public class Ship {
     }
 
     public void addProduct(Product product) {
-        products.add(product);
+        products.insertEnd(product);
     }
 
-    public void deleteProduct(Product product) {
-        products.remove(product);
+    public void deleteProduct(Product product) throws ProductNotInMenuException {
+        Position<Product> pos = Utils.find(products.positions(), p -> p.equals(product))
+                        .orElseThrow(ProductNotInMenuException::new);
+        products.delete(pos);
     }
 
     public int numProducts() {
         return products.size();
+    }
+
+    public Iterator<Product> products() {
+        return products.values();
     }
 
 

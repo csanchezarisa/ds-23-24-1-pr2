@@ -1,6 +1,8 @@
 package uoc.ds.pr.util;
 
+import edu.uoc.ds.adt.helpers.Position;
 import edu.uoc.ds.traversal.Iterator;
+import edu.uoc.ds.traversal.Traversal;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -12,7 +14,9 @@ public final class Utils {
     }
 
     /**
-     * Loops an iterator evaluating the predicate. If there is any match with it, true is returned. Otherwise, false.
+     * Loops an {@link edu.uoc.ds.traversal.Iterator} evaluating the predicate. If there is any match with it, true is
+     * returned. Otherwise, false.
+     *
      * @param it iterator to loop
      * @param predicate predicate to evaluate each element in the iterator
      * @return true is there is any match with the predicate, else false
@@ -26,6 +30,24 @@ public final class Utils {
             }
         }
         return false;
+    }
+
+    /**
+     * Loops a {@link edu.uoc.ds.traversal.Traversal} looking for an element that suits the predicate.
+     *
+     * @param it traversal iterator to loop
+     * @param predicate predicate used to evaluate each element in the iterator
+     * @return an optional containing the search result
+     * @param <E> class type of the elements contained in the iterator
+     */
+    public static <E> Optional<Position<E>> find(Traversal<E> it, Predicate<E> predicate) {
+        while (it.hasNext()) {
+            Position<E> pos = it.next();
+            if (predicate.test(pos.getElem())) {
+                return Optional.of(pos);
+            }
+        }
+        return Optional.empty();
     }
 
     public static <E> Optional<E> find(Iterator<E> it, Predicate<E> predicate) {

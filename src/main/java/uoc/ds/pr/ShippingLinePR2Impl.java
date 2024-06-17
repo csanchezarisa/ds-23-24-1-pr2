@@ -340,12 +340,39 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void linkProduct(String productId, String shipId) throws ProductNotFoundException, ShipNotFoundException, ProductAlreadyOnMenuException {
+        Product product = getProduct(productId);
+        if (product == null) {
+            throw new ProductNotFoundException();
+        }
 
+        Ship ship = getShip(shipId);
+        if (ship == null) {
+            throw new ShipNotFoundException();
+        }
+
+        if (Utils.anyMatch(ship.products(), p -> p.equals(product))) {
+            throw new ProductAlreadyOnMenuException();
+        }
+
+        ship.addProduct(product);
     }
 
     @Override
     public void unlinkProduct(String productId, String shipId) throws ProductNotFoundException, ShipNotFoundException, ProductNotInMenuException {
+        Product product = getProduct(productId);
+        if (product == null) {
+            throw new ProductNotFoundException();
+        }
 
+        Ship ship = getShip(shipId);
+        if (ship == null) {
+            throw new ShipNotFoundException();
+        }
+
+        if (!Utils.anyMatch(ship.products(), p -> p.equals(product))) {
+            throw new ProductNotInMenuException();
+        }
+        ship.deleteProduct(product);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package uoc.ds.pr.model;
 
+import java.util.Objects;
+
 public class Product {
 
     private String id;
@@ -50,5 +52,17 @@ public class Product {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Product product)) return false;
+        return Objects.equals(id, product.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
