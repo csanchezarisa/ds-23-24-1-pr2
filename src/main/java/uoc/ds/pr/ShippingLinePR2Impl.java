@@ -2,7 +2,10 @@ package uoc.ds.pr;
 
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Optional;
 
+import edu.uoc.ds.adt.nonlinear.Dictionary;
+import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
 import edu.uoc.ds.adt.nonlinear.HashTable;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
@@ -21,11 +24,12 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     private DSArray<Ship> ships;
     private HashTable<String, Route> routes;
-    private DSLinkedList<Client> clients;
-    private DSLinkedList<Voyage> voyages;
+    private Dictionary<String, Client> clients;
+    private Dictionary<String, Voyage> voyages;
     private HashTable<String, Port> ports;
     private DSLinkedList<Category> categories;
     private HashTable<String, Product> products;
+    private Dictionary<String, Order> orders;
 
     private OrderedVector<Client>  bestClient;
 	private OrderedVector<Route> bestRoute;
@@ -37,11 +41,12 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     public ShippingLinePR2Impl() {
         ships = new DSArray<>(MAX_NUM_SHIPS);
         routes = new HashTable<>();
-        clients = new DSLinkedList<>(Client.CMP);
-        voyages = new DSLinkedList<>(Voyage.CMP);
+        clients = new DictionaryAVLImpl<>();
+        voyages = new DictionaryAVLImpl<>();
         ports = new HashTable<>();
         categories = new DSLinkedList<>(Comparator.comparing(Category::getId));
         products = new HashTable<>();
+        orders = new DictionaryAVLImpl<>();
         bestClient = new OrderedVector<>(MAX_CLIENTS, Client.CMP_V);
         bestRoute = new OrderedVector<>(MAX_NUM_ROUTES, Route.CMP_V);
     }
@@ -61,15 +66,11 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void addRoute(String id, String beginningPort, String arrivalPort, double kms) throws SrcPortNotFoundException, DstPortNotFoundException, RouteAlreadyExistException {
-        final Port srcPort = getPort(beginningPort);
-        if (srcPort == null) {
-            throw new SrcPortNotFoundException();
-        }
+        final Port srcPort = Optional.ofNullable(getPort(beginningPort))
+                .orElseThrow(SrcPortNotFoundException::new);
 
-        final Port dstPort = getPort(arrivalPort);
-        if (dstPort == null) {
-            throw new DstPortNotFoundException();
-        }
+        final Port dstPort = Optional.ofNullable(getPort(arrivalPort))
+                .orElseThrow(DstPortNotFoundException::new);
 
         if (Utils.anyMatch(routes.values(), r -> r.getDstPort().equals(dstPort) && r.getSrcPort().equals(srcPort))) {
             throw new RouteAlreadyExistException();
@@ -90,7 +91,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         Client client = getClient(id);
         if (client == null) {
             client = new Client(id, name, surname);
-            clients.insertEnd(client);
+            clients.put(id, client);
         }
         else {
             client.update(name, surname);
@@ -121,10 +122,8 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void addProduct(String id, String name, String description, String idCategory) throws CategoryNotFoundException {
-        Category category = getCategory(idCategory);
-        if (category == null) {
-            throw new CategoryNotFoundException();
-        }
+        final Category category = Optional.ofNullable(getCategory(idCategory))
+                .orElseThrow(CategoryNotFoundException::new);
         category.deleteProduct(id);
 
         Product product = getProduct(id);
@@ -141,20 +140,16 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     @Override
     public void addVoyage(String id, Date departureDt, Date arrivalDt, String idShip, String idRoute) throws ShipNotFoundException, RouteNotFoundException {
 
-        Ship ship = getShip(idShip);
-        if (ship == null) {
-            throw new ShipNotFoundException();
-        }
+        final Ship ship = Optional.ofNullable(getShip(idShip))
+                .orElseThrow(ShipNotFoundException::new);
 
-        Route route = getRoute(idRoute);
-        if (route == null) {
-            throw new RouteNotFoundException();
-        }
+        final Route route = Optional.ofNullable(getRoute(idRoute))
+                .orElseThrow(RouteNotFoundException::new);
 
         Voyage voyage = getVoyage(id);
         if (voyage == null) {
             voyage = new Voyage(id, departureDt, arrivalDt, ship, route);
-            voyages.insertEnd(voyage);
+            voyages.put(id, voyage);
             route.addVoyage(voyage);
             updateBestRoute(voyage.getRoute());
         }
@@ -326,10 +321,8 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Product> getProductsByCategory(String categoryId) throws CategoryNotFoundException, NoProductsException {
-        final Category category = getCategory(categoryId);
-        if (category == null) {
-            throw new CategoryNotFoundException();
-        }
+        final Category category = Optional.ofNullable(getCategory(categoryId))
+                .orElseThrow(CategoryNotFoundException::new);
 
         if (category.numProducts() < 1) {
             throw new NoProductsException();
@@ -340,15 +333,11 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void linkProduct(String productId, String shipId) throws ProductNotFoundException, ShipNotFoundException, ProductAlreadyOnMenuException {
-        Product product = getProduct(productId);
-        if (product == null) {
-            throw new ProductNotFoundException();
-        }
+        final Product product = Optional.ofNullable(getProduct(productId))
+                .orElseThrow(ProductNotFoundException::new);
 
-        Ship ship = getShip(shipId);
-        if (ship == null) {
-            throw new ShipNotFoundException();
-        }
+        final Ship ship = Optional.ofNullable(getShip(shipId))
+                .orElseThrow(ShipNotFoundException::new);
 
         if (Utils.anyMatch(ship.products(), p -> p.equals(product))) {
             throw new ProductAlreadyOnMenuException();
@@ -359,15 +348,11 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void unlinkProduct(String productId, String shipId) throws ProductNotFoundException, ShipNotFoundException, ProductNotInMenuException {
-        Product product = getProduct(productId);
-        if (product == null) {
-            throw new ProductNotFoundException();
-        }
+        final Product product = Optional.ofNullable(getProduct(productId))
+                .orElseThrow(ProductNotFoundException::new);
 
-        Ship ship = getShip(shipId);
-        if (ship == null) {
-            throw new ShipNotFoundException();
-        }
+        final Ship ship = Optional.ofNullable(getShip(shipId))
+                .orElseThrow(ShipNotFoundException::new);
 
         if (!Utils.anyMatch(ship.products(), p -> p.equals(product))) {
             throw new ProductNotInMenuException();
@@ -377,15 +362,11 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Product> getVoyageProductsByCategory(String voyageId, String categoryId) throws VoyageNotFoundException, CategoryNotFoundException, NoProductsException {
-        final Voyage voyage = getVoyage(voyageId);
-        if (voyage == null) {
-            throw new VoyageNotFoundException();
-        }
+        final Voyage voyage = Optional.ofNullable(getVoyage(voyageId))
+                .orElseThrow(VoyageNotFoundException::new);
 
-        final Category category = getCategory(categoryId);
-        if (category == null) {
-            throw new CategoryNotFoundException();
-        }
+        final Category category = Optional.ofNullable(getCategory(categoryId))
+                .orElseThrow(CategoryNotFoundException::new);
 
         List<Product> productsByCategory = Utils.filter(voyage.getShip().products(), p -> p.getCategory().equals(category));
         if (productsByCategory.isEmpty()) {
@@ -396,7 +377,6 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void makeOrder(String clientId, String voyageId, String[] products, double price) throws ClientNotFoundException, VoyageNotFoundException, ProductNotFoundException, ProductNotInMenuException, ClientIsNotInVoyageException {
-
     }
 
     @Override
@@ -445,7 +425,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     }
 
     public Client getClient(String id) {
-        return clients.get(new Client(id));
+        return clients.get(id);
     }
 
     public Route getRoute(String idRoute) {
@@ -453,7 +433,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     }
 
     public Voyage getVoyage(String id) {
-        return voyages.get(new Voyage(id));
+        return voyages.get(id);
     }
 
     public int numShips() {

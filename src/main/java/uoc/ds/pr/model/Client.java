@@ -4,6 +4,8 @@ import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.ShippingLinePR2;
+import uoc.ds.pr.util.LoyaltyLevel;
+import uoc.ds.pr.util.Utils;
 
 import java.util.Comparator;
 
@@ -17,6 +19,7 @@ public class Client implements Comparable<Client> {
 
     private List<Reservation> reservations;
     private List<Voyage> voyages;
+    private List<Order> orders;
 
 
     public Client(String id, String name, String surname) {
@@ -25,6 +28,7 @@ public class Client implements Comparable<Client> {
         this.surname = surname;
         this.reservations = new LinkedList<>();
         this.voyages = new LinkedList<>();
+        this.orders = new LinkedList<>();
     }
 
     public Client(String id) {
@@ -101,11 +105,19 @@ public class Client implements Comparable<Client> {
         return this.id.compareTo(o.id);
     }
 
+    public int numLoadedReservations() {
+        return Utils.count(reservations.values(), Reservation::isLoaded);
+    }
+
     public ShippingLinePR2.LoyaltyLevel getLevel() {
-        return ShippingLinePR2.LoyaltyLevel.BRONZE;
+        return LoyaltyLevel.getLevel(numLoadedReservations());
+    }
+
+    public void addOrder(Order order) {
+        this.orders.insertEnd(order);
     }
 
     public int numOrders() {
-        return 0;
+        return orders.size();
     }
 }

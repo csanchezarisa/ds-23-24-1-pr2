@@ -1,5 +1,6 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.nonlinear.PriorityQueue;
 import edu.uoc.ds.adt.sequential.*;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.ShippingLine;
@@ -10,6 +11,8 @@ import java.util.Comparator;
 
 public class Voyage {
     public static final Comparator<Voyage> CMP = (o1, o2) -> o1.getId().compareTo(o2.getId());
+    public static final Comparator<Order> CMP_LEVEL = Comparator.comparingInt(o -> o.getClient().numLoadedReservations());
+
     private String id;
     private Date departureDt;
     private Date arrivalDt;
@@ -21,6 +24,8 @@ public class Voyage {
     private FiniteLinkedList<Reservation> cabin2;
     private FiniteLinkedList<Reservation> cabin4;
     private Stack<Reservation> parking;
+    private List<Order> servedOrders;
+    private Queue<Order> pendingOrders;
 
     private int availableParkingSlots;
 
@@ -41,6 +46,8 @@ public class Voyage {
         parking = new StackArrayImpl<>(ship.getnParkingSlots());
         this.availableParkingSlots = ship.getnParkingSlots();
         reservations = new LinkedList<>();
+        this.servedOrders = new LinkedList<>();
+        this.pendingOrders = new PriorityQueue<>(CMP_LEVEL);
     }
 
     public String getId() {
