@@ -2,10 +2,8 @@ package uoc.ds.pr.util;
 
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
-import uoc.ds.pr.model.Client;
 import uoc.ds.pr.model.Ship;
 
 import java.util.Objects;
