@@ -242,12 +242,35 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
             reservation.setUnLoadTimeInMinutes(unLoadTimeInMinutes);
             unLoadTimeInMinutes += ship.getUnLoadTimeInMinutes();
         }
+        voyage.disembarked();
+
         return voyage.parking();
     }
 
     @Override
     public int unloadTime(String idVehicle, String idVoyage) throws LandingNotDoneException, VoyageNotFoundException, VehicleNotFoundException {
-        return 0;
+        Voyage voyage = getVoyage(idVoyage);
+        if (voyage == null) {
+            throw new VoyageNotFoundException();
+        }
+
+        if (!voyage.hasDisembarked()) {
+            throw new LandingNotDoneException();
+        }
+
+        Iterator<Reservation> it = voyage.parking();
+        Reservation reservation = null;
+        boolean found = false;
+
+        while (it.hasNext() && !found) {
+            reservation = it.next();
+            found = reservation.getIdVehicle().equals(idVehicle);
+        }
+        if (!found) {
+            throw new VehicleNotFoundException();
+        }
+
+        return (reservation.getUnLoadTimeInMinutes());
     }
 
     public Iterator<Reservation> getClientReservations(String idClient) throws NoReservationException {

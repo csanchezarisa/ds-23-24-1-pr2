@@ -32,8 +32,11 @@ public class Voyage {
 
     private int availableParkingSlots;
 
+    private boolean disembarked;
+
     public Voyage(String id) {
         this.setId(id);
+        disembarked = false;
     }
 
 
@@ -225,6 +228,14 @@ public class Voyage {
 
     public int numParkingLots() {
         return this.parking.size();
+    }
+
+    public boolean hasDisembarked() {
+        return this.disembarked;
+    }
+
+    public void disembarked() {
+        this.disembarked = true;
     }
 
     public void addOrder(Order order) {
