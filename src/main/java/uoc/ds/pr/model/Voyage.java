@@ -252,6 +252,15 @@ public class Voyage {
         return order;
     }
 
+    public List<Order> getOrders() {
+        List<Order> orders = new LinkedList<>();
+
+        orders.insertAll(servedOrders);
+        orders.insertAll(Utils.toList(pendingOrders));
+
+        return orders;
+    }
+
     public boolean isProductAvailable(Product product) {
         return Utils.anyMatch(ship.products(), p -> p.equals(product));
     }

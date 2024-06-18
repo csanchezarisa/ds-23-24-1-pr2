@@ -454,22 +454,29 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Order> getOrdersByShip(String shipId) throws ShipNotFoundException, NoOrdersException {
-//        final Ship ship = Optional.ofNullable(getShip(shipId))
-//                .orElseThrow(ShipNotFoundException::new);
-//
-//        var voyagesWithShip = Utils.filter(voyages.values(), v -> v.getShip().equals(ship)).values();
-//        List<Order> ordersByShip = new LinkedList<>();
-//
-//        while (voyagesWithShip.hasNext()) {
-//            var v = voyagesWithShip.next();
-//
-//        }
-        return null;
+        final Ship ship = Optional.ofNullable(getShip(shipId))
+                .orElseThrow(ShipNotFoundException::new);
+
+        var voyagesWithShip = Utils.filter(voyages.values(), v -> v.getShip().equals(ship)).values();
+        List<Order> ordersByShip = new LinkedList<>();
+
+        while (voyagesWithShip.hasNext()) {
+            var v = voyagesWithShip.next();
+            ordersByShip.insertAll(v.getOrders());
+        }
+
+        if (ordersByShip.isEmpty()) {
+            throw new NoOrdersException();
+        }
+
+        return ordersByShip.values();
     }
 
     @Override
     public LoyaltyLevel getLevel(String clientId) throws ClientNotFoundException {
-        return null;
+        return Optional.ofNullable(getClient(clientId))
+                .map(Client::getLevel)
+                .orElseThrow(ClientNotFoundException::new);
     }
 
     @Override

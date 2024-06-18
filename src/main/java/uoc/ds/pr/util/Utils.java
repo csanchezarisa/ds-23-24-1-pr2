@@ -1,6 +1,7 @@
 package uoc.ds.pr.util;
 
 import edu.uoc.ds.adt.helpers.Position;
+import edu.uoc.ds.adt.sequential.Container;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
@@ -107,5 +108,23 @@ public final class Utils {
         }
 
         return count;
+    }
+
+    /**
+     * Converts any collection from DSLib into a List.
+     *
+     * @param collection collection of elements to be converted
+     * @param <E>        class type of the elements contained in the iterator
+     * @return list containing all the elements
+     */
+    public static <E> List<E> toList(Container<E> collection) {
+        List<E> result = new LinkedList<>();
+
+        var it = collection.values();
+        while (it.hasNext()) {
+            result.insertEnd(it.next());
+        }
+
+        return result;
     }
 }

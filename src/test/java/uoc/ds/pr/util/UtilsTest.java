@@ -67,4 +67,12 @@ public class UtilsTest {
         var result = Utils.count(ships.values(), s -> s.getUnLoadTimeInMinutes() > 0);
         assertEquals(1, result);
     }
+
+    @Test
+    public void testToList() {
+        var result = Utils.toList(ships);
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals(ship, result.values().next());
+    }
 }
