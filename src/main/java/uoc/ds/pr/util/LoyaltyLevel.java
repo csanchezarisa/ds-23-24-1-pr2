@@ -24,4 +24,13 @@ public final class LoyaltyLevel {
         }
         return ShippingLinePR2.LoyaltyLevel.BRONZE;
     }
+
+    public static int getLevelValue(ShippingLinePR2.LoyaltyLevel level) {
+        return switch (level) {
+            case BRONZE -> 0;
+            case SILVER -> 1;
+            case GOLD -> 2;
+            case DIAMOND -> 3;
+        };
+    }
 }

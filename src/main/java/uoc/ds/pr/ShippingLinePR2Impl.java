@@ -1,10 +1,5 @@
 package uoc.ds.pr;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
-
 import edu.uoc.ds.adt.nonlinear.Dictionary;
 import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
 import edu.uoc.ds.adt.nonlinear.HashTable;
@@ -17,6 +12,11 @@ import uoc.ds.pr.util.DSArray;
 import uoc.ds.pr.util.DSLinkedList;
 import uoc.ds.pr.util.OrderedVector;
 import uoc.ds.pr.util.Utils;
+
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
 
 
 public class ShippingLinePR2Impl implements ShippingLinePR2 {
@@ -408,7 +408,14 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Order serveOrder(String voyageId) throws VoyageNotFoundException, NoOrdersException {
-        return null;
+        final Voyage voyage = Optional.ofNullable(getVoyage(voyageId))
+                .orElseThrow(VoyageNotFoundException::new);
+
+        if (!voyage.arePendingOrders()) {
+            throw new NoOrdersException();
+        }
+
+        return voyage.serveOrder();
     }
 
     @Override

@@ -5,14 +5,16 @@ import edu.uoc.ds.adt.sequential.*;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.ShippingLine;
 import uoc.ds.pr.util.FiniteLinkedList;
+import uoc.ds.pr.util.LoyaltyLevel;
 import uoc.ds.pr.util.Utils;
 
-import java.util.Date;
 import java.util.Comparator;
+import java.util.Date;
 
 public class Voyage {
     public static final Comparator<Voyage> CMP = (o1, o2) -> o1.getId().compareTo(o2.getId());
-    public static final Comparator<Order> CMP_LEVEL = Comparator.comparingInt(o -> o.getClient().numLoadedReservations());
+    public static final Comparator<Order> CMP_LEVEL = Comparator.comparingInt((Order o) -> LoyaltyLevel.getLevelValue(o.getClient().getLevel()))
+            .thenComparing(Order::getCreated);
 
     private String id;
     private Date departureDt;
@@ -227,6 +229,16 @@ public class Voyage {
 
     public void addOrder(Order order) {
         pendingOrders.add(order);
+    }
+
+    public boolean arePendingOrders() {
+        return !pendingOrders.isEmpty();
+    }
+
+    public Order serveOrder() {
+        Order order = pendingOrders.poll();
+        servedOrders.insertEnd(order);
+        return order;
     }
 
     public boolean isProductAvailable(Product product) {
