@@ -377,7 +377,21 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Product> getVoyageProductsByCategory(String voyageId, String categoryId) throws VoyageNotFoundException, CategoryNotFoundException, NoProductsException {
-        return null;
+        final Voyage voyage = getVoyage(voyageId);
+        if (voyage == null) {
+            throw new VoyageNotFoundException();
+        }
+
+        final Category category = getCategory(categoryId);
+        if (category == null) {
+            throw new CategoryNotFoundException();
+        }
+
+        List<Product> productsByCategory = Utils.filter(voyage.getShip().products(), p -> p.getCategory().equals(category));
+        if (productsByCategory.isEmpty()) {
+            throw new NoProductsException();
+        }
+        return productsByCategory.values();
     }
 
     @Override
@@ -452,7 +466,15 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Route getRoute(String idBeginningPort, String idArrivalPort) throws NoRouteException, SamePortException {
-        return null;
+        if (idArrivalPort.equalsIgnoreCase(idBeginningPort)) {
+            throw new SamePortException();
+        }
+
+        final Port srcPort = getPort(idBeginningPort);
+        final Port dstPort = getPort(idArrivalPort);
+
+        return Utils.find(routes.values(), r -> r.getSrcPort().equals(srcPort) && r.getDstPort().equals(dstPort))
+                .orElseThrow(NoRouteException::new);
     }
 
     @Override

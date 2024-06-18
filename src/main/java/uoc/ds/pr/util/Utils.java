@@ -1,6 +1,8 @@
 package uoc.ds.pr.util;
 
 import edu.uoc.ds.adt.helpers.Position;
+import edu.uoc.ds.adt.sequential.LinkedList;
+import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
 import edu.uoc.ds.traversal.Traversal;
 
@@ -23,13 +25,7 @@ public final class Utils {
      * @param <E> class type of the elements contained in the iterator
      */
     public static <E> boolean anyMatch(Iterator<E> it, Predicate<E> predicate) {
-        while (it.hasNext()) {
-            E e = it.next();
-            if (predicate.test(e)) {
-                return true;
-            }
-        }
-        return false;
+        return find(it, predicate).isPresent();
     }
 
     /**
@@ -50,6 +46,15 @@ public final class Utils {
         return Optional.empty();
     }
 
+    /**
+     * Loops an {@link edu.uoc.ds.traversal.Iterator} evaluating the predicate. If there is any match with it, then
+     * it's returned.
+     *
+     * @param it iterator to loop
+     * @param predicate predicate to evaluate each element in the iterator
+     * @return optional containing the result
+     * @param <E> class type of the elements contained in the iterator
+     */
     public static <E> Optional<E> find(Iterator<E> it, Predicate<E> predicate) {
         while (it.hasNext()) {
             E e = it.next();
@@ -58,5 +63,18 @@ public final class Utils {
             }
         }
         return Optional.empty();
+    }
+
+    public static <E> List<E> filter(Iterator<E> it, Predicate<E> predicate) {
+        List<E> result = new LinkedList<>();
+
+        while (it.hasNext()) {
+            E e = it.next();
+            if (predicate.test(e)) {
+                result.insertEnd(e);
+            }
+        }
+
+        return result;
     }
 }
