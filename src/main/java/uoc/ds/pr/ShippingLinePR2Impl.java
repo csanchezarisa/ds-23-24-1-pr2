@@ -384,8 +384,9 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         final Voyage voyage = Optional.ofNullable(getVoyage(voyageId))
                 .orElseThrow(VoyageNotFoundException::new);
 
-        Optional.ofNullable(client.findReservation(voyageId))
-                .orElseThrow(ClientIsNotInVoyageException::new);
+        if (client.findReservation(voyageId) == null) {
+            throw new ClientIsNotInVoyageException();
+        }
 
         List<Product> productList = new LinkedList<>();
         for (String productId : products) {
