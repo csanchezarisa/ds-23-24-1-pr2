@@ -545,7 +545,14 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Voyage> getVoyagesByRoute(String routeId) throws NoVoyagesException {
-        return null;
+        final Route route = getRoute(routeId);
+
+        var result = Utils.filter(voyages.values(), v -> v.getRoute().equals(route));
+
+        if (result.isEmpty()) {
+            throw new NoVoyagesException();
+        }
+        return result.values();
     }
 
     @Override
