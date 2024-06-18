@@ -13,6 +13,8 @@ public class Client implements Comparable<Client> {
 
     public static final Comparator<Client> CMP = (c1, c2) -> c1.getId().compareTo(c2.getId());
     public static final Comparator<Client> CMP_V = (c1, c2)->Double.compare(c1.voyages.size(), c2.voyages.size());
+    public static final Comparator<Client> CMP_ORDER = Comparator.comparingInt(Client::numOrders).reversed();
+
     private String id;
     private String name;
     private String surname;

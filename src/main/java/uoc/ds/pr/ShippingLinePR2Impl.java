@@ -33,6 +33,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     private Dictionary<String, Order> orders;
 
     private OrderedVector<Client>  bestClient;
+    private OrderedVector<Client> bestClientByOrders;
 	private OrderedVector<Route> bestRoute;
 
 
@@ -49,6 +50,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         products = new HashTable<>();
         orders = new DictionaryAVLImpl<>();
         bestClient = new OrderedVector<>(MAX_CLIENTS, Client.CMP_V);
+        bestClientByOrders = new OrderedVector<>(5, Client.CMP_ORDER);
         bestRoute = new OrderedVector<>(MAX_NUM_ROUTES, Route.CMP_V);
     }
 
@@ -427,6 +429,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         orders.put(UUID.randomUUID().toString(), order);
         client.addOrder(order);
         voyage.addOrder(order);
+        bestClientByOrders.update(client);
     }
 
     @Override
@@ -557,7 +560,11 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Client> best5Clients() throws NoClientException {
-        return null;
+        if (bestClientByOrders.isEmpty()) {
+            throw new NoClientException();
+        }
+
+        return bestClientByOrders.values();
     }
 
     @Override
