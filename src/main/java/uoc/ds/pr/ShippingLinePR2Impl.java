@@ -3,6 +3,7 @@ package uoc.ds.pr;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 import edu.uoc.ds.adt.nonlinear.Dictionary;
 import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
@@ -377,6 +378,31 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public void makeOrder(String clientId, String voyageId, String[] products, double price) throws ClientNotFoundException, VoyageNotFoundException, ProductNotFoundException, ProductNotInMenuException, ClientIsNotInVoyageException {
+        final Client client = Optional.ofNullable(getClient(clientId))
+                .orElseThrow(ClientNotFoundException::new);
+
+        final Voyage voyage = Optional.ofNullable(getVoyage(voyageId))
+                .orElseThrow(VoyageNotFoundException::new);
+
+        Optional.ofNullable(client.findReservation(voyageId))
+                .orElseThrow(ClientIsNotInVoyageException::new);
+
+        List<Product> productList = new LinkedList<>();
+        for (String productId : products) {
+            final Product product = Optional.ofNullable(getProduct(productId))
+                    .orElseThrow(ProductNotFoundException::new);
+
+            if (!voyage.isProductAvailable(product)) {
+                throw new ProductNotInMenuException();
+            }
+
+            productList.insertEnd(product);
+        }
+
+        Order order = new Order(client, voyage, price, productList);
+        orders.put(UUID.randomUUID().toString(), order);
+        client.addOrder(order);
+        voyage.addOrder(order);
     }
 
     @Override
@@ -515,7 +541,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public int numOrders(String voyageId) {
-        return 0;
+        return Utils.count(orders.values(), o -> o.getVoyage().getId().equals(voyageId));
     }
 
     @Override

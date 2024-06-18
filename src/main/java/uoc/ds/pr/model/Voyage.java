@@ -5,6 +5,7 @@ import edu.uoc.ds.adt.sequential.*;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.ShippingLine;
 import uoc.ds.pr.util.FiniteLinkedList;
+import uoc.ds.pr.util.Utils;
 
 import java.util.Date;
 import java.util.Comparator;
@@ -222,5 +223,13 @@ public class Voyage {
 
     public int numParkingLots() {
         return this.parking.size();
+    }
+
+    public void addOrder(Order order) {
+        pendingOrders.add(order);
+    }
+
+    public boolean isProductAvailable(Product product) {
+        return Utils.anyMatch(ship.products(), p -> p.equals(product));
     }
 }
