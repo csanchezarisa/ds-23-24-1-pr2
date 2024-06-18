@@ -421,7 +421,13 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Route> getRoutesByOrigin(String portId) throws NoRouteException {
-        return null;
+        final Port srcPort = getPort(portId);
+
+        List<Route> routesByPort = Utils.filter(routes.values(), r -> r.getSrcPort().equals(srcPort));
+        if (routesByPort.isEmpty()) {
+            throw new NoRouteException();
+        }
+        return routesByPort.values();
     }
 
     /***********************************************************************************/
