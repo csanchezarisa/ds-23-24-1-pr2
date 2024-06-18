@@ -420,11 +420,27 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public Iterator<Order> getOrdersByClient(String clientId) throws ClientNotFoundException, NoOrdersException {
-        return null;
+        final Client client = Optional.ofNullable(getClient(clientId))
+                .orElseThrow(ClientNotFoundException::new);
+
+        if (client.numOrders() < 1) {
+            throw new NoOrdersException();
+        }
+        return client.orders();
     }
 
     @Override
     public Iterator<Order> getOrdersByShip(String shipId) throws ShipNotFoundException, NoOrdersException {
+//        final Ship ship = Optional.ofNullable(getShip(shipId))
+//                .orElseThrow(ShipNotFoundException::new);
+//
+//        var voyagesWithShip = Utils.filter(voyages.values(), v -> v.getShip().equals(ship)).values();
+//        List<Order> ordersByShip = new LinkedList<>();
+//
+//        while (voyagesWithShip.hasNext()) {
+//            var v = voyagesWithShip.next();
+//
+//        }
         return null;
     }
 

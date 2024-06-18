@@ -120,4 +120,8 @@ public class Client implements Comparable<Client> {
     public int numOrders() {
         return orders.size();
     }
+
+    public Iterator<Order> orders() {
+        return this.orders.values();
+    }
 }
