@@ -7,6 +7,7 @@ import edu.uoc.ds.adt.nonlinear.graphs.DirectedGraph;
 import edu.uoc.ds.adt.nonlinear.graphs.DirectedGraphImpl;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
+import edu.uoc.ds.algorithms.MinimumPaths;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
@@ -15,15 +16,12 @@ import uoc.ds.pr.util.DSLinkedList;
 import uoc.ds.pr.util.OrderedVector;
 import uoc.ds.pr.util.Utils;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 
 public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
-    private static final int MAX = 15;
+    private static final MinimumPaths<Port, Route> MIN_PATH_ALGORITHM = new MinimumPaths<>();
 
     private DSArray<Ship> ships;
     private HashTable<String, Route> routes;
@@ -590,19 +588,22 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     @Override
     public boolean existsRouteBetween(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException {
         Port[] queryPorts = getPorts(idAPort, idBPort);
-        return Utils.existConnection(portsNetwork, queryPorts[0], queryPorts[1]);
+
+        var minPaths = MIN_PATH_ALGORITHM.calculate(portsNetwork, portsNetwork.getVertex(queryPorts[0]));
+
+        double cost = Arrays.stream(minPaths)
+                .filter(k -> k.getKey().getValue().equals(queryPorts[1]))
+                .map(k -> k.getValue().doubleValue())
+                .findFirst()
+                .orElse(Double.POSITIVE_INFINITY);
+
+        return cost != Double.POSITIVE_INFINITY;
     }
 
     @Override
     public Iterator<Route> getBestKmsRoute(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException, NoRouteException {
         Port[] queryPorts = getPorts(idAPort, idBPort);
-
-        var it = Utils.bestKmsConnection(portsNetwork, queryPorts[0], queryPorts[1]);
-        if (!it.hasNext()) {
-            throw new NoRouteException();
-        }
-
-        return it;
+        return null;
     }
 
     @Override

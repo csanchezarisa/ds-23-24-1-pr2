@@ -12,5 +12,4 @@
   - `filter` function that allows to filter an **Iterator** and creates a new list containing the result
   - `count` function that counts the number of elements in an **Iterator** that fit a predicate
   - `toList` function that converts any data structure of DSLib into a List
-  - `existConnection` function that runs through a graph an check if a path between two points exists
 - `TestUtils` test class for Utils class

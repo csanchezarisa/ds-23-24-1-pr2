@@ -1,19 +1,13 @@
 package uoc.ds.pr.util;
 
 import edu.uoc.ds.adt.helpers.Position;
-import edu.uoc.ds.adt.nonlinear.graphs.DirectedEdge;
-import edu.uoc.ds.adt.nonlinear.graphs.DirectedGraph;
-import edu.uoc.ds.adt.nonlinear.graphs.Edge;
-import edu.uoc.ds.adt.nonlinear.graphs.Vertex;
 import edu.uoc.ds.adt.sequential.Container;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
 import edu.uoc.ds.traversal.Traversal;
-import uoc.ds.pr.model.Port;
-import uoc.ds.pr.model.Route;
 
-import java.util.*;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public final class Utils {
@@ -129,109 +123,6 @@ public final class Utils {
         var it = collection.values();
         while (it.hasNext()) {
             result.insertEnd(it.next());
-        }
-
-        return result;
-    }
-
-    /**
-     * Runs through the graph and tries to find a path between the source and the destination vertexes.
-     *
-     * @param graph graph to be analysed
-     * @param src   source vertex
-     * @param dst   destination vertex
-     * @return boolean indicating whether the path exists or not
-     */
-    public static <E, L> boolean existConnection(DirectedGraph<E, L> graph, E src, E dst) {
-        Vertex<E> srcVertex = graph.getVertex(src);
-        Vertex<E> dstVertex = graph.getVertex(dst);
-
-        return existConnection(graph, srcVertex, dstVertex, new java.util.LinkedList<>(), new HashSet<>());
-    }
-
-    /**
-     * Recursive method that tries to find a path between source and destination vertexes.
-     *
-     * @param graph   graph to be analysed
-     * @param src     current source vertex
-     * @param dst     destination vertex
-     * @param pending queue of vertexes that are pending to be analysed
-     * @param visited collection of visited vertexes
-     * @return boolean indicating whether the path exists or not
-     */
-    private static <E, L> boolean existConnection(DirectedGraph<E, L> graph, Vertex<E> src, Vertex<E> dst,
-                                                  Queue<Vertex<E>> pending, Set<Vertex<E>> visited) {
-        if (pending.contains(dst)) {
-            return true;
-        }
-
-        pending.addAll(edgeIteratorToVertedJavaSet(graph.edgesWithSource(src)));
-        pending.removeAll(visited);
-        visited.add(src);
-
-        if (pending.isEmpty()) {
-            return false;
-        }
-        return existConnection(graph, pending.remove(), dst, pending, visited);
-    }
-
-    public static Iterator<Route> bestKmsConnection(DirectedGraph<Port, Route> graph, Port src, Port dst) {
-        Vertex<Port> srcVertex = graph.getVertex(src);
-        Vertex<Port> dstVertex = graph.getVertex(dst);
-
-        Queue<DirectedEdge<Route, Port>> pending = new PriorityQueue<>(Comparator.comparingDouble(e -> e.getLabel().getKms()));
-        pending.addAll(edgeIteratorToDirectedJavaSet(graph.edgesWithSource(srcVertex)));
-
-        List<Route> result = new LinkedList<>();
-        var bestRoute = bestKmsConnection(graph, dstVertex, pending, new HashSet<>());
-        bestRoute.forEach(result::insertEnd);
-
-        return result.values();
-    }
-
-    private static java.util.List<Route> bestKmsConnection(DirectedGraph<Port, Route> graph, Vertex<Port> dst,
-                                                           Queue<DirectedEdge<Route, Port>> pending,
-                                                           Set<DirectedEdge<Route, Port>> visited) {
-
-        if (pending.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        var edge = pending.remove();
-        if (edge.getVertexDst().equals(dst)) {
-            java.util.List<Route> result = new ArrayList<>();
-            result.add(edge.getLabel());
-            return result;
-        }
-
-        pending.addAll(edgeIteratorToDirectedJavaSet(graph.edgesWithSource(edge.getVertexDst())));
-        pending.removeAll(visited);
-        visited.add(edge);
-
-        var result = bestKmsConnection(graph, dst, pending, visited);
-        if (result.isEmpty()) {
-            return new ArrayList<>();
-        }
-        result.add(0, edge.getLabel());
-        return result;
-    }
-
-    private static <E, L> Set<Vertex<E>> edgeIteratorToVertedJavaSet(Iterator<Edge<L, E>> it) {
-        Set<Vertex<E>> result = new HashSet<>();
-
-        while (it.hasNext()) {
-            var e = (DirectedEdge<L, E>) it.next();
-            result.add(e.getVertexDst());
-        }
-
-        return result;
-    }
-
-    private static <E, L> Set<DirectedEdge<L, E>> edgeIteratorToDirectedJavaSet(Iterator<Edge<L, E>> it) {
-        Set<DirectedEdge<L, E>> result = new HashSet<>();
-
-        while (it.hasNext()) {
-            result.add((DirectedEdge<L, E>) it.next());
         }
 
         return result;

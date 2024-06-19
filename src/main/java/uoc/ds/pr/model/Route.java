@@ -7,7 +7,7 @@ import edu.uoc.ds.traversal.Traversal;
 
 import java.util.Comparator;
 
-public class Route implements Comparable<Route> {
+public class Route extends Number implements Comparable<Route> {
     public static final Comparator<Route> CMP_V = (r1, r2) -> Integer.compare(r1.voyages.size(), r2.voyages.size());
     private String id;
     private Port beginningPort;
@@ -77,5 +77,25 @@ public class Route implements Comparable<Route> {
 
     public Port getDstPort() {
         return arrivalPort;
+    }
+
+    @Override
+    public int intValue() {
+        return (int) kms;
+    }
+
+    @Override
+    public long longValue() {
+        return (long) kms;
+    }
+
+    @Override
+    public float floatValue() {
+        return (float) kms;
+    }
+
+    @Override
+    public double doubleValue() {
+        return kms;
     }
 }
