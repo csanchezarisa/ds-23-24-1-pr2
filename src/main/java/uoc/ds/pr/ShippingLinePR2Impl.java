@@ -585,7 +585,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     @Override
     public boolean existsRouteBetween(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException {
         Port[] queryPorts = getPorts(idAPort, idBPort);
-        return GraphUtils.existsRouteBetween(portsNetwork, queryPorts[0], queryPorts[1]);
+        return GraphUtils.existConnection(portsNetwork, queryPorts[0], queryPorts[1]);
     }
 
     @Override
