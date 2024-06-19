@@ -3,6 +3,8 @@ package uoc.ds.pr;
 import edu.uoc.ds.adt.nonlinear.Dictionary;
 import edu.uoc.ds.adt.nonlinear.DictionaryAVLImpl;
 import edu.uoc.ds.adt.nonlinear.HashTable;
+import edu.uoc.ds.adt.nonlinear.graphs.DirectedGraph;
+import edu.uoc.ds.adt.nonlinear.graphs.DirectedGraphImpl;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
@@ -31,6 +33,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     private DSLinkedList<Category> categories;
     private HashTable<String, Product> products;
     private Dictionary<String, Order> orders;
+    private DirectedGraph<Port, Double> portsNetwork;
 
     private OrderedVector<Client>  bestClient;
     private OrderedVector<Client> bestClientByOrders;
@@ -52,6 +55,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         bestClient = new OrderedVector<>(MAX_CLIENTS, Client.CMP_V);
         bestClientByOrders = new OrderedVector<>(5, Client.CMP_ORDER);
         bestRoute = new OrderedVector<>(MAX_NUM_ROUTES, Route.CMP_V);
+        portsNetwork = new DirectedGraphImpl<>();
     }
 
 
@@ -79,6 +83,16 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
             throw new RouteAlreadyExistException();
         }
 
+
+        var srcVertex = Optional.ofNullable(portsNetwork.getVertex(srcPort))
+                .orElseGet(() -> portsNetwork.newVertex(srcPort));
+        var dstVertex = Optional.ofNullable(portsNetwork.getVertex(dstPort))
+                .orElseGet(() -> portsNetwork.newVertex(dstPort));
+
+        // Remove the edge if exists
+        Optional.ofNullable(portsNetwork.getEdge(srcVertex, dstVertex))
+                .ifPresent(edge -> portsNetwork.deleteEdge(edge));
+
         Route route = getRoute(id);
         if (route == null) {
             route = new Route(id, srcPort, dstPort, kms);
@@ -87,6 +101,10 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         else {
             route.update(srcPort, dstPort);
         }
+
+        // Create the new edge
+        var edge = portsNetwork.newEdge(srcVertex, dstVertex);
+        edge.setLabel(kms);
     }
 
     public void addClient(String id, String name, String surname) {
@@ -569,16 +587,19 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     @Override
     public boolean existsRouteBetween(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException {
-        return false;
+        Port[] queryPorts = getPorts(idAPort, idBPort);
+        return Utils.existConnection(portsNetwork, queryPorts[0], queryPorts[1]);
     }
 
     @Override
     public Iterator<Route> getBestKmsRoute(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException, NoRouteException {
+        Port[] queryPorts = getPorts(idAPort, idBPort);
         return null;
     }
 
     @Override
     public Iterator<Route> getBestPortsRoute(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException, NoRouteException {
+        Port[] queryPorts = getPorts(idAPort, idBPort);
         return null;
     }
 
@@ -619,5 +640,29 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
 
     public Product getProduct(String id) {
         return products.get(id);
+    }
+
+    /**
+     * Queries and returns an array with the two ports, searched by ID
+     *
+     * @param srcPortId source port ID
+     * @param dstPortId destination port ID
+     * @return an array where index 0 is the source port and index 1 is the destination one
+     * @throws SamePortException        when both IDs are equal
+     * @throws SrcPortNotFoundException when source port is not found
+     * @throws DstPortNotFoundException when destination port is not found
+     */
+    private Port[] getPorts(String srcPortId, String dstPortId) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException {
+
+        if (srcPortId.equalsIgnoreCase(dstPortId)) {
+            throw new SamePortException();
+        }
+
+        Port srcPort = Optional.ofNullable(getPort(srcPortId))
+                .orElseThrow(SrcPortNotFoundException::new);
+        Port dstPort = Optional.ofNullable(getPort(dstPortId))
+                .orElseThrow(DstPortNotFoundException::new);
+
+        return new Port[]{srcPort, dstPort};
     }
 }
