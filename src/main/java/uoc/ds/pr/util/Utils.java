@@ -10,11 +10,10 @@ import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.traversal.Iterator;
 import edu.uoc.ds.traversal.Traversal;
+import uoc.ds.pr.model.Port;
+import uoc.ds.pr.model.Route;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public final class Utils {
@@ -176,12 +175,63 @@ public final class Utils {
         return existConnection(graph, pending.remove(), dst, pending, visited);
     }
 
+    public static Iterator<Route> bestKmsConnection(DirectedGraph<Port, Route> graph, Port src, Port dst) {
+        Vertex<Port> srcVertex = graph.getVertex(src);
+        Vertex<Port> dstVertex = graph.getVertex(dst);
+
+        Queue<DirectedEdge<Route, Port>> pending = new PriorityQueue<>(Comparator.comparingDouble(e -> e.getLabel().getKms()));
+        pending.addAll(edgeIteratorToDirectedJavaSet(graph.edgesWithSource(srcVertex)));
+
+        List<Route> result = new LinkedList<>();
+        var bestRoute = bestKmsConnection(graph, dstVertex, pending, new HashSet<>());
+        bestRoute.forEach(result::insertEnd);
+
+        return result.values();
+    }
+
+    private static java.util.List<Route> bestKmsConnection(DirectedGraph<Port, Route> graph, Vertex<Port> dst,
+                                                           Queue<DirectedEdge<Route, Port>> pending,
+                                                           Set<DirectedEdge<Route, Port>> visited) {
+
+        if (pending.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        var edge = pending.remove();
+        if (edge.getVertexDst().equals(dst)) {
+            java.util.List<Route> result = new ArrayList<>();
+            result.add(edge.getLabel());
+            return result;
+        }
+
+        pending.addAll(edgeIteratorToDirectedJavaSet(graph.edgesWithSource(edge.getVertexDst())));
+        pending.removeAll(visited);
+        visited.add(edge);
+
+        var result = bestKmsConnection(graph, dst, pending, visited);
+        if (result.isEmpty()) {
+            return new ArrayList<>();
+        }
+        result.add(0, edge.getLabel());
+        return result;
+    }
+
     private static <E, L> Set<Vertex<E>> edgeIteratorToVertedJavaSet(Iterator<Edge<L, E>> it) {
         Set<Vertex<E>> result = new HashSet<>();
 
         while (it.hasNext()) {
             var e = (DirectedEdge<L, E>) it.next();
             result.add(e.getVertexDst());
+        }
+
+        return result;
+    }
+
+    private static <E, L> Set<DirectedEdge<L, E>> edgeIteratorToDirectedJavaSet(Iterator<Edge<L, E>> it) {
+        Set<DirectedEdge<L, E>> result = new HashSet<>();
+
+        while (it.hasNext()) {
+            result.add((DirectedEdge<L, E>) it.next());
         }
 
         return result;

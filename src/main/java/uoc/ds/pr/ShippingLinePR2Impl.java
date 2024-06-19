@@ -33,7 +33,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     private DSLinkedList<Category> categories;
     private HashTable<String, Product> products;
     private Dictionary<String, Order> orders;
-    private DirectedGraph<Port, Double> portsNetwork;
+    private DirectedGraph<Port, Route> portsNetwork;
 
     private OrderedVector<Client>  bestClient;
     private OrderedVector<Client> bestClientByOrders;
@@ -99,12 +99,14 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
             this.routes.put(id, route);
         }
         else {
+            route.getSrcPort().removeRoute(route);
             route.update(srcPort, dstPort);
         }
+        srcPort.addRoute(route);
 
         // Create the new edge
         var edge = portsNetwork.newEdge(srcVertex, dstVertex);
-        edge.setLabel(kms);
+        edge.setLabel(route);
     }
 
     public void addClient(String id, String name, String surname) {
@@ -560,7 +562,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         final Port srcPort = getPort(idBeginningPort);
         final Port dstPort = getPort(idArrivalPort);
 
-        return Utils.find(routes.values(), r -> r.getSrcPort().equals(srcPort) && r.getDstPort().equals(dstPort))
+        return Utils.find(srcPort.routesOrigin(), r -> r.getDstPort().equals(dstPort))
                 .orElseThrow(NoRouteException::new);
     }
 
@@ -594,7 +596,13 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     @Override
     public Iterator<Route> getBestKmsRoute(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException, NoRouteException {
         Port[] queryPorts = getPorts(idAPort, idBPort);
-        return null;
+
+        var it = Utils.bestKmsConnection(portsNetwork, queryPorts[0], queryPorts[1]);
+        if (!it.hasNext()) {
+            throw new NoRouteException();
+        }
+
+        return it;
     }
 
     @Override

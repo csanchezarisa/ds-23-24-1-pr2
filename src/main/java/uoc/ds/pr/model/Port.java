@@ -1,5 +1,10 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.sequential.LinkedList;
+import edu.uoc.ds.adt.sequential.List;
+import edu.uoc.ds.traversal.Iterator;
+import uoc.ds.pr.util.Utils;
+
 import java.util.Objects;
 
 public class Port {
@@ -8,12 +13,14 @@ public class Port {
     private String name;
     private String imageUrl;
     private String description;
+    private List<Route> originRoutes;
 
     public Port(String id, String imageUrl, String description, String name) {
         this.id = id;
         this.imageUrl = imageUrl;
         this.description = description;
         this.name = name;
+        this.originRoutes = new LinkedList<>();
     }
 
     public void update(String imageUrl, String description, String name) {
@@ -69,5 +76,18 @@ public class Port {
     @Override
     public int hashCode() {
         return Objects.hashCode(name);
+    }
+
+    public void addRoute(Route route) {
+        originRoutes.insertEnd(route);
+    }
+
+    public void removeRoute(Route route) {
+        Utils.find(originRoutes.positions(), r -> r.equals(route))
+                .ifPresent(originRoutes::delete);
+    }
+
+    public Iterator<Route> routesOrigin() {
+        return originRoutes.values();
     }
 }
