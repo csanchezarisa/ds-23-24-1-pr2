@@ -33,7 +33,10 @@ public final class GraphUtils {
         Vertex<E> srcVertex = graph.getVertex(src);
         Vertex<E> dstVertex = graph.getVertex(dst);
 
-        return existConnection(graph, srcVertex, dstVertex, new java.util.LinkedList<>(), new HashSet<>());
+        Queue<Vertex<E>> pending = new java.util.LinkedList<>();
+        pending.add(srcVertex);
+
+        return existConnection(graph, dstVertex, pending, new HashSet<>());
     }
 
 
@@ -41,26 +44,27 @@ public final class GraphUtils {
      * Recursive method that tries to find a path between source and destination vertexes.
      *
      * @param graph   graph to be analysed
-     * @param src     current source vertex
      * @param dst     destination vertex
      * @param pending queue of vertexes that are pending to be analysed
      * @param visited collection of visited vertexes
      * @return boolean indicating whether the path exists or not
      */
-    private static <E, L> boolean existConnection(DirectedGraph<E, L> graph, Vertex<E> src, Vertex<E> dst,
+    private static <E, L> boolean existConnection(DirectedGraph<E, L> graph, Vertex<E> dst,
                                                   Queue<Vertex<E>> pending, Set<Vertex<E>> visited) {
+        if (pending.isEmpty()) {
+            return false;
+        }
+
         if (pending.contains(dst)) {
             return true;
         }
 
+        Vertex<E> src = pending.remove();
         pending.addAll(edgeIteratorToVertedJavaSet(graph.edgesWithSource(src)));
         pending.removeAll(visited);
         visited.add(src);
 
-        if (pending.isEmpty()) {
-            return false;
-        }
-        return existConnection(graph, pending.remove(), dst, pending, visited);
+        return existConnection(graph, dst, pending, visited);
     }
 
     /**
