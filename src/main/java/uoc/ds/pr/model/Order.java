@@ -2,15 +2,13 @@ package uoc.ds.pr.model;
 
 import edu.uoc.ds.adt.sequential.List;
 
-import java.time.Instant;
-
 public class Order {
 
     private Client client;
     private Voyage voyage;
     private double price;
     private List<Product> products;
-    private final Instant created = Instant.now();
+    private int creationId = 0;
 
     public Order(Client client, Voyage voyage, double price, List<Product> products) {
         this.client = client;
@@ -51,8 +49,12 @@ public class Order {
         this.products = products;
     }
 
-    public Instant getCreated() {
-        return this.created;
+    public int getCreationId() {
+        return creationId;
+    }
+
+    public void setCreationId(int creationId) {
+        this.creationId = creationId;
     }
 
     @Override
