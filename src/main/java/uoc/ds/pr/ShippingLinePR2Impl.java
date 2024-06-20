@@ -605,7 +605,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         Port[] queryPorts = getPorts(idAPort, idBPort);
 
         var result = GraphUtils.bestPortRoute(portsNetwork, queryPorts[0], queryPorts[1]);
-        if (!result.isEmpty()) {
+        if (result.isEmpty()) {
             throw new NoRouteException();
         }
 
