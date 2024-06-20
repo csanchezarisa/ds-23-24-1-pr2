@@ -1,9 +1,11 @@
 package uoc.ds.pr.util;
 
+import edu.uoc.ds.adt.helpers.KeyValue;
 import edu.uoc.ds.adt.nonlinear.graphs.DirectedEdge;
 import edu.uoc.ds.adt.nonlinear.graphs.DirectedGraph;
 import edu.uoc.ds.adt.nonlinear.graphs.Edge;
 import edu.uoc.ds.adt.nonlinear.graphs.Vertex;
+import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.List;
 import edu.uoc.ds.algorithms.MinimumPaths;
 import edu.uoc.ds.traversal.Iterator;
@@ -104,12 +106,12 @@ public final class GraphUtils {
     }
 
     /**
-     * Calculates and returns an iterator with the best route based on the number of ports
+     * Calculates and returns a list with the best route based on the number of ports
      *
      * @param graph to be analysed
      * @param src   source port
      * @param dst   destination port
-     * @return iterator containing the best route based on the number of ports
+     * @return list containing the best route based on the number of ports
      */
     public static List<Route> bestPortRoute(DirectedGraph<Port, Route> graph, Port src, Port dst) {
         Vertex<Port> srcVertex = graph.getVertex(src);
@@ -117,7 +119,7 @@ public final class GraphUtils {
 
         Set<DirectedEdge<Route, Port>> pending = new HashSet<>(edgeIteratorToDirectedJavaSet(graph.edgesWithSource(srcVertex)));
 
-        List<Route> result = new edu.uoc.ds.adt.sequential.LinkedList<>();
+        List<Route> result = new LinkedList<>();
         bestPortRoute(graph, dstVertex, pending)
                 .forEach(result::insertEnd);
         return result;
@@ -127,7 +129,7 @@ public final class GraphUtils {
      * Recursive method that runs through the pending edges, expanding their destination vertex and trying to find
      * the best route based on the number of vertexes contained
      *
-     * @param graph   graph to be anaysed
+     * @param graph   graph to be analysed
      * @param dst     destination vertex
      * @param pending pending edges to be expanded
      * @return a list containing the best route to arrive to the destination based on the number of ports. Empty list if
@@ -165,5 +167,79 @@ public final class GraphUtils {
         }
 
         return bestRoute;
+    }
+
+    /**
+     * Calculates and returns a list with the best route based on the distance between ports.
+     * Uses {@link edu.uoc.ds.algorithms.MinimumPaths} algorithm to calculate the best paths in distance.
+     *
+     * @param graph to be analysed
+     * @param src   source port
+     * @param dst   destination port
+     * @return a list containing the best route based on the distance between ports
+     */
+    public static List<Route> bestKmsRoute(DirectedGraph<Port, Route> graph, Port src, Port dst) {
+        Vertex<Port> srcVertex = graph.getVertex(src);
+        Vertex<Port> dstVertex = graph.getVertex(dst);
+
+        var minPaths = MIN_PATH_ALGORITHM.calculate(graph, srcVertex);
+        if (!isConnected(minPaths, dstVertex)) {
+            return new LinkedList<>();
+        }
+
+        List<Route> bestPath = new LinkedList<>();
+
+        boolean sourceFound;
+
+        do {
+            KeyValue<Vertex<Port>, Number> bestEntry = null;
+            DirectedEdge<Route, Port> bestEdge = null;
+
+            for (var edge : edgeIteratorToDirectedJavaSet(graph.edgedWithDestination(dstVertex))) {
+                KeyValue<Vertex<Port>, Number> edgeEntry = getEntry(minPaths, edge.getVertexSrc());
+                if (bestEntry == null || bestEntry.getValue().doubleValue() > edgeEntry.getValue().doubleValue()) {
+                    bestEntry = edgeEntry;
+                    bestEdge = edge;
+                }
+            }
+            sourceFound = bestEntry.getKey().equals(srcVertex);
+
+            bestPath.insertBeginning(bestEdge.getLabel());
+            dstVertex = bestEntry.getKey();
+        } while (!sourceFound);
+
+        return bestPath;
+    }
+
+    /**
+     * Checks if a vertex is accessible in the KeyValues array
+     *
+     * @param minPaths min paths KeyValues array, result of {@link edu.uoc.ds.algorithms.MinimumPaths} algorithm
+     * @param dst      destination vertex
+     * @return boolean indicating whether the vertex is accessible or not
+     */
+    private static <K, V extends Number> boolean isConnected(KeyValue<K, V>[] minPaths, K dst) {
+        for (KeyValue<K, V> entry : minPaths) {
+            if (entry.getKey().equals(dst)) {
+                return entry.getValue().doubleValue() != Double.POSITIVE_INFINITY;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns an entry in the KeyValues array produced by {@link edu.uoc.ds.algorithms.MinimumPaths}.
+     *
+     * @param minPaths KeyValues array produced by {@link edu.uoc.ds.algorithms.MinimumPaths} algorithm
+     * @param vertex   vertex to find
+     * @return KeyValue of the vertex in the array. Null if not found
+     */
+    private static <K, V extends Number> KeyValue<K, V> getEntry(KeyValue<K, V>[] minPaths, K vertex) {
+        for (KeyValue<K, V> entry : minPaths) {
+            if (entry.getKey().equals(vertex)) {
+                return entry;
+            }
+        }
+        return null;
     }
 }

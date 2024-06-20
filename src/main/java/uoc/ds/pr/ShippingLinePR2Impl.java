@@ -591,7 +591,13 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     @Override
     public Iterator<Route> getBestKmsRoute(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException, NoRouteException {
         Port[] queryPorts = getPorts(idAPort, idBPort);
-        return null;
+
+        var result = GraphUtils.bestKmsRoute(portsNetwork, queryPorts[0], queryPorts[1]);
+        if (result.isEmpty()) {
+            throw new NoRouteException();
+        }
+
+        return result.values();
     }
 
     @Override

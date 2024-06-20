@@ -12,7 +12,8 @@
   - `filter` function that allows to filter an **Iterator** and creates a new list containing the result
   - `count` function that counts the number of elements in an **Iterator** that fit a predicate
   - `toList` function that converts any data structure of DSLib into a List
-- `GraphUtils` class created. Contains functionalities needed to manage and query graphs.
+- `GraphUtils` class created. Contains functionalities needed to manage and query graphs
   - `existConnection` checks if a route exist between two ports
   - `bestPortRoute` returns the best route based on the number of ports
+  - `bestKmsRoute` returns the best route based on the distance between ports using `MinimumPaths` class algorithm
 - `TestUtils` test class for Utils class
