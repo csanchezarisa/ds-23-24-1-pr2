@@ -597,7 +597,13 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
     @Override
     public Iterator<Route> getBestPortsRoute(String idAPort, String idBPort) throws SamePortException, SrcPortNotFoundException, DstPortNotFoundException, NoRouteException {
         Port[] queryPorts = getPorts(idAPort, idBPort);
-        return null;
+
+        var it = GraphUtils.bestPortRoute(portsNetwork, queryPorts[0], queryPorts[1]);
+        if (!it.hasNext()) {
+            throw new NoRouteException();
+        }
+
+        return it;
     }
 
     @Override

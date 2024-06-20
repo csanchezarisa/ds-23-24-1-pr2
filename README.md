@@ -14,4 +14,5 @@
   - `toList` function that converts any data structure of DSLib into a List
 - `GraphUtils` class created. Contains functionalities needed to manage and query graphs.
   - `existConnection` checks if a route exist between two ports
+  - `bestPortRoute` returns the best route based on the number of ports
 - `TestUtils` test class for Utils class
