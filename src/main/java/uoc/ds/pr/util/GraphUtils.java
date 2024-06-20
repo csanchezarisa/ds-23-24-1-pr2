@@ -111,7 +111,7 @@ public final class GraphUtils {
      * @param dst   destination port
      * @return iterator containing the best route based on the number of ports
      */
-    public static Iterator<Route> bestPortRoute(DirectedGraph<Port, Route> graph, Port src, Port dst) {
+    public static List<Route> bestPortRoute(DirectedGraph<Port, Route> graph, Port src, Port dst) {
         Vertex<Port> srcVertex = graph.getVertex(src);
         Vertex<Port> dstVertex = graph.getVertex(dst);
 
@@ -120,7 +120,7 @@ public final class GraphUtils {
         List<Route> result = new edu.uoc.ds.adt.sequential.LinkedList<>();
         bestPortRoute(graph, dstVertex, pending)
                 .forEach(result::insertEnd);
-        return result.values();
+        return result;
     }
 
     /**
