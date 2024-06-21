@@ -8,7 +8,7 @@ public class Order {
     private Voyage voyage;
     private double price;
     private List<Product> products;
-    private int creationId = 0;
+    private long creation = System.nanoTime();
 
     public Order(Client client, Voyage voyage, double price, List<Product> products) {
         this.client = client;
@@ -49,12 +49,8 @@ public class Order {
         this.products = products;
     }
 
-    public int getCreationId() {
-        return creationId;
-    }
-
-    public void setCreationId(int creationId) {
-        this.creationId = creationId;
+    public long getCreation() {
+        return creation;
     }
 
     @Override

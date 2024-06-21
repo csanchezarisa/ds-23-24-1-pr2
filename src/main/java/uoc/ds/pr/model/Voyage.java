@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Voyage {
     public static final Comparator<Voyage> CMP = (o1, o2) -> o1.getId().compareTo(o2.getId());
     public static final Comparator<Order> CMP_LEVEL = Comparator.comparingInt((Order o) -> o.getClient().getLevel().ordinal())
-            .thenComparingInt(Order::getCreationId);
+            .thenComparingLong(Order::getCreation);
 
     private String id;
     private Date departureDt;
@@ -240,7 +240,6 @@ public class Voyage {
     }
 
     public void addOrder(Order order) {
-        order.setCreationId(pendingOrdersId.getAndIncrement());
         pendingOrders.add(order);
     }
 
