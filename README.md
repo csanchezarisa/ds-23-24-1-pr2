@@ -18,3 +18,4 @@
   - `bestPortRoute` returns the best route based on the number of ports
   - `bestKmsRoute` returns the best route based on the distance between ports using `MinimumPaths` class algorithm
 - `GraphUtilsTest` test class for GraphUtils class
+- `ShippingLinePR2ExtraTest` to test all uncovered lines of code

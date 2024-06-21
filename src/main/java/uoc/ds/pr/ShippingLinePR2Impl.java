@@ -49,7 +49,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         orders = new DictionaryAVLImpl<>();
         bestClient = new OrderedVector<>(MAX_CLIENTS, Client.CMP_V);
         bestClientByOrders = new OrderedVector<>(5, Client.CMP_ORDER);
-        bestRoute = new OrderedVector<>(MAX_NUM_ROUTES, Route.CMP_V);
+        bestRoute = new OrderedVector<>(1, Route.CMP_V);
         portsNetwork = new DirectedGraphImpl<>();
     }
 
