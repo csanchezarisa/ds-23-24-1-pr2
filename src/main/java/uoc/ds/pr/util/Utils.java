@@ -127,4 +127,29 @@ public final class Utils {
 
         return result;
     }
+
+    public static <E> boolean contains(Container<E> collection, E elem) {
+        var it = collection.values();
+        while (it.hasNext()) {
+            if (elem.equals(it.next())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes all the elements from source that are contained in target collections.
+     *
+     * @param target collection where to remove the elements
+     * @param source collections where to get the elements to remove in target
+     */
+    public static <E> void removeAll(List<E> target, Container<E> source) {
+        var it = source.values();
+        while (it.hasNext()) {
+            final E elemToRemove = it.next();
+            find(target.positions(), e -> e.equals(elemToRemove))
+                    .ifPresent(target::delete);
+        }
+    }
 }
