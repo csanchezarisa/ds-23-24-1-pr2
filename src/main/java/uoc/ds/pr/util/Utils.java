@@ -111,6 +111,22 @@ public final class Utils {
     }
 
     /**
+     * Removes all the elements from source that are contained in target collections.
+     *
+     * @param target    collection where to remove the elements
+     * @param predicate predicate applied to decide which elements are going to be deleted
+     */
+    public static <E> void removeIf(List<E> target, Predicate<E> predicate) {
+        var it = target.positions();
+        while (it.hasNext()) {
+            final Position<E> pos = it.next();
+            if (predicate.test(pos.getElem())) {
+                target.delete(pos);
+            }
+        }
+    }
+
+    /**
      * Converts any collection from DSLib into a List.
      *
      * @param collection collection of elements to be converted

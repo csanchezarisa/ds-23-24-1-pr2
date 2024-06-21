@@ -14,9 +14,6 @@ import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.model.Port;
 import uoc.ds.pr.model.Route;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 public final class GraphUtils {
 
     private static final MinimumPaths<Port, Route> MIN_PATH_ALGORITHM = new MinimumPaths<>();
@@ -72,10 +69,10 @@ public final class GraphUtils {
     }
 
     /**
-     * Converts and edge iterator into a set of destination vectors
+     * Converts and edge iterator into a list of destination vectors
      *
      * @param it edge iterator
-     * @return set of destination vectors
+     * @return list of destination vectors
      */
     private static <E, L> List<Vertex<E>> edgeIteratorToVertexList(Iterator<Edge<L, E>> it) {
         List<Vertex<E>> result = new LinkedList<>();
@@ -95,11 +92,11 @@ public final class GraphUtils {
      * @param it edge iterator
      * @return set of edges
      */
-    private static <E, L> java.util.Set<DirectedEdge<L, E>> edgeIteratorToDirectedJavaSet(Iterator<Edge<L, E>> it) {
-        java.util.Set<DirectedEdge<L, E>> result = new HashSet<>();
+    private static <E, L> List<DirectedEdge<L, E>> edgeIteratorToDirectedEdgeList(Iterator<Edge<L, E>> it) {
+        List<DirectedEdge<L, E>> result = new LinkedList<>();
 
         while (it.hasNext()) {
-            result.add((DirectedEdge<L, E>) it.next());
+            result.insertEnd((DirectedEdge<L, E>) it.next());
         }
 
         return result;
@@ -117,12 +114,10 @@ public final class GraphUtils {
         Vertex<Port> srcVertex = graph.getVertex(src);
         Vertex<Port> dstVertex = graph.getVertex(dst);
 
-        java.util.Set<DirectedEdge<Route, Port>> pending = new HashSet<>(edgeIteratorToDirectedJavaSet(graph.edgesWithSource(srcVertex)));
+        List<DirectedEdge<Route, Port>> pending = new LinkedList<>();
+        pending.insertAll(edgeIteratorToDirectedEdgeList(graph.edgesWithSource(srcVertex)));
 
-        List<Route> result = new LinkedList<>();
-        bestPortRoute(graph, dstVertex, pending)
-                .forEach(result::insertEnd);
-        return result;
+        return bestPortRoute(graph, dstVertex, pending);
     }
 
     /**
@@ -135,31 +130,36 @@ public final class GraphUtils {
      * @return a list containing the best route to arrive to the destination based on the number of ports. Empty list if
      * the route does not exist
      */
-    private static java.util.List<Route> bestPortRoute(DirectedGraph<Port, Route> graph, Vertex<Port> dst,
-                                                       java.util.Set<DirectedEdge<Route, Port>> pending) {
+    private static List<Route> bestPortRoute(DirectedGraph<Port, Route> graph, Vertex<Port> dst,
+                                             List<DirectedEdge<Route, Port>> pending) {
 
         if (pending.isEmpty()) {
-            return new ArrayList<>();
+            return new LinkedList<>();
         }
 
-        java.util.List<Route> bestRoute = new ArrayList<>();
+        List<Route> bestRoute = new LinkedList<>();
 
-        for (var edge : pending) {
+        var it = pending.values();
+        while (it.hasNext()) {
+            var edge = it.next();
+
             var vertex = edge.getVertexDst();
 
             if (dst.equals(vertex)) {
-                java.util.List<Route> result = new ArrayList<>();
-                result.add(edge.getLabel());
+                List<Route> result = new LinkedList<>();
+                result.insertEnd(edge.getLabel());
                 return result;
             }
 
-            java.util.Set<DirectedEdge<Route, Port>> newPending = new HashSet<>(edgeIteratorToDirectedJavaSet(graph.edgesWithSource(vertex)));
-            java.util.List<Route> finalBestRoute = bestRoute;
-            newPending.removeIf(e -> finalBestRoute.contains(e.getLabel()));
+            List<DirectedEdge<Route, Port>> newPending = new LinkedList<>();
+            newPending.insertAll(edgeIteratorToDirectedEdgeList(graph.edgesWithSource(vertex)));
 
-            java.util.List<Route> result = bestPortRoute(graph, dst, newPending);
+            List<Route> finalBestRoute = bestRoute;
+            Utils.removeIf(newPending, e -> Utils.contains(finalBestRoute, e.getLabel()));
+
+            List<Route> result = bestPortRoute(graph, dst, newPending);
             if (!result.isEmpty()) {
-                result.add(0, edge.getLabel());
+                result.insertBeginning(edge.getLabel());
                 if (bestRoute.isEmpty() || result.size() < bestRoute.size()) {
                     bestRoute = result;
                 }
@@ -195,13 +195,17 @@ public final class GraphUtils {
             KeyValue<Vertex<Port>, Number> bestEntry = null;
             DirectedEdge<Route, Port> bestEdge = null;
 
-            for (var edge : edgeIteratorToDirectedJavaSet(graph.edgedWithDestination(dstVertex))) {
+            var it = edgeIteratorToDirectedEdgeList(graph.edgedWithDestination(dstVertex)).values();
+            while (it.hasNext()) {
+                var edge = it.next();
+
                 KeyValue<Vertex<Port>, Number> edgeEntry = getEntry(minPaths, edge.getVertexSrc());
                 if (bestEntry == null || bestEntry.getValue().doubleValue() > edgeEntry.getValue().doubleValue()) {
                     bestEntry = edgeEntry;
                     bestEdge = edge;
                 }
             }
+
             sourceFound = bestEntry.getKey().equals(srcVertex);
 
             bestPath.insertBeginning(bestEdge.getLabel());
