@@ -144,6 +144,13 @@ public final class Utils {
         return result;
     }
 
+    /**
+     * Checks if an element is contained in a collection
+     *
+     * @param collection collection to be checked
+     * @param elem       element to find
+     * @return boolean indicating whether the element is contained in the collection or not
+     */
     public static <E> boolean contains(Container<E> collection, E elem) {
         var it = collection.values();
         while (it.hasNext()) {
