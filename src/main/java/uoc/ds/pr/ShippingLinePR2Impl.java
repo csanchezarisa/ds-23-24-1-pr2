@@ -79,10 +79,8 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         }
 
 
-        var srcVertex = Optional.ofNullable(portsNetwork.getVertex(srcPort))
-                .orElseGet(() -> portsNetwork.newVertex(srcPort));
-        var dstVertex = Optional.ofNullable(portsNetwork.getVertex(dstPort))
-                .orElseGet(() -> portsNetwork.newVertex(dstPort));
+        var srcVertex = portsNetwork.getVertex(srcPort);
+        var dstVertex = portsNetwork.getVertex(dstPort);
 
         // Remove the edge if exists
         Optional.ofNullable(portsNetwork.getEdge(srcVertex, dstVertex))
@@ -95,6 +93,13 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         }
         else {
             route.getSrcPort().removeRoute(route);
+
+            // Remove the edge between the old ports before updating
+            var oldSrcVertex = portsNetwork.getVertex(route.getSrcPort());
+            var oldDstVertex = portsNetwork.getVertex(route.getDstPort());
+            Optional.ofNullable(portsNetwork.getEdge(oldSrcVertex, oldDstVertex))
+                    .ifPresent(edge -> portsNetwork.deleteEdge(edge));
+
             route.update(srcPort, dstPort);
         }
         srcPort.addRoute(route);
@@ -125,6 +130,7 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         }
         port = new Port(id, imageUrl, description, name);
         ports.put(id, port);
+        portsNetwork.newVertex(port);
     }
 
     @Override
