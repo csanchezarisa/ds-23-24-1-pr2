@@ -75,4 +75,33 @@ public class UtilsTest {
         assertEquals(1, result.size());
         assertEquals(ship, result.values().next());
     }
+
+    @Test
+    public void testRemoveIf() {
+        ships.insertEnd(new Ship("newId", "newName", 0, 0, 0, 0, 0));
+        Utils.removeIf(ships, s -> s.getUnLoadTimeInMinutes() == 0);
+        assertEquals(1, ships.size());
+        assertEquals(ship, ships.values().next());
+    }
+
+    @Test
+    public void testContains() {
+        assertTrue(Utils.contains(ships, ship));
+        assertFalse(Utils.contains(ships, new Ship("newId", "newName", 0, 0, 0, 0, 0)));
+    }
+
+    @Test
+    public void testRemoveAll() {
+        Ship newShip = new Ship("newId", "newName", 0, 0, 0, 0, 0);
+        ships.insertEnd(newShip);
+
+        List<Ship> shipsToRemove = new LinkedList<>();
+        shipsToRemove.insertEnd(newShip);
+
+        assertEquals(2, ships.size());
+
+        Utils.removeAll(ships, shipsToRemove);
+        assertEquals(1, ships.size());
+        assertEquals(ship, ships.values().next());
+    }
 }
