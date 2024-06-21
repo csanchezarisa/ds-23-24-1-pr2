@@ -8,7 +8,7 @@ public class Order {
     private Voyage voyage;
     private double price;
     private List<Product> products;
-    private long creation = System.nanoTime();
+    private final long creation = System.nanoTime();
 
     public Order(Client client, Voyage voyage, double price, List<Product> products) {
         this.client = client;
