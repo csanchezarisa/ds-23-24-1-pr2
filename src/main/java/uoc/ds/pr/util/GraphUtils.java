@@ -69,40 +69,6 @@ public final class GraphUtils {
     }
 
     /**
-     * Converts and edge iterator into a list of destination vectors
-     *
-     * @param it edge iterator
-     * @return list of destination vectors
-     */
-    private static <E, L> List<Vertex<E>> edgeIteratorToVertexList(Iterator<Edge<L, E>> it) {
-        List<Vertex<E>> result = new LinkedList<>();
-
-        while (it.hasNext()) {
-            var e = (DirectedEdge<L, E>) it.next();
-            result.insertEnd(e.getVertexDst());
-        }
-
-        return result;
-    }
-
-
-    /**
-     * Converts and edge iterator into a set of edges
-     *
-     * @param it edge iterator
-     * @return set of edges
-     */
-    private static <E, L> List<DirectedEdge<L, E>> edgeIteratorToDirectedEdgeList(Iterator<Edge<L, E>> it) {
-        List<DirectedEdge<L, E>> result = new LinkedList<>();
-
-        while (it.hasNext()) {
-            result.insertEnd((DirectedEdge<L, E>) it.next());
-        }
-
-        return result;
-    }
-
-    /**
      * Calculates and returns a list with the best route based on the number of ports
      *
      * @param graph to be analysed
@@ -143,18 +109,18 @@ public final class GraphUtils {
         while (it.hasNext()) {
             var edge = it.next();
 
-            var vertex = edge.getVertexDst();
+            var dstVertex = edge.getVertexDst();
 
-            if (dst.equals(vertex)) {
+            if (dst.equals(dstVertex)) {
                 List<Route> result = new LinkedList<>();
                 result.insertEnd(edge.getLabel());
                 return result;
             }
 
             List<DirectedEdge<Route, Port>> newPending = new LinkedList<>();
-            newPending.insertAll(edgeIteratorToDirectedEdgeList(graph.edgesWithSource(vertex)));
+            newPending.insertAll(edgeIteratorToDirectedEdgeList(graph.edgesWithSource(dstVertex)));
 
-            List<Route> finalBestRoute = bestRoute;
+            final List<Route> finalBestRoute = bestRoute; // Needed to execute the removeIf function
             Utils.removeIf(newPending, e -> Utils.contains(finalBestRoute, e.getLabel()));
 
             List<Route> result = bestPortRoute(graph, dst, newPending);
@@ -190,14 +156,13 @@ public final class GraphUtils {
         List<Route> bestPath = new LinkedList<>();
 
         boolean sourceFound;
-
         do {
             KeyValue<Vertex<Port>, Number> bestEntry = null;
             DirectedEdge<Route, Port> bestEdge = null;
 
-            var it = edgeIteratorToDirectedEdgeList(graph.edgedWithDestination(dstVertex)).values();
+            var it = graph.edgedWithDestination(dstVertex);
             while (it.hasNext()) {
-                var edge = it.next();
+                var edge = (DirectedEdge<Route, Port>) it.next();
 
                 KeyValue<Vertex<Port>, Number> edgeEntry = getEntry(minPaths, edge.getVertexSrc());
                 if (bestEntry == null || bestEntry.getValue().doubleValue() > edgeEntry.getValue().doubleValue()) {
@@ -206,13 +171,48 @@ public final class GraphUtils {
                 }
             }
 
-            sourceFound = bestEntry.getKey().equals(srcVertex);
-
             bestPath.insertBeginning(bestEdge.getLabel());
             dstVertex = bestEntry.getKey();
+
+            sourceFound = bestEntry.getKey().equals(srcVertex);
+
         } while (!sourceFound);
 
         return bestPath;
+    }
+
+    /**
+     * Converts and edge iterator into a list of destination vectors
+     *
+     * @param it edge iterator
+     * @return list of destination vectors
+     */
+    private static <E, L> List<Vertex<E>> edgeIteratorToVertexList(Iterator<Edge<L, E>> it) {
+        List<Vertex<E>> result = new LinkedList<>();
+
+        while (it.hasNext()) {
+            var e = (DirectedEdge<L, E>) it.next();
+            result.insertEnd(e.getVertexDst());
+        }
+
+        return result;
+    }
+
+
+    /**
+     * Converts and edge iterator into a set of edges
+     *
+     * @param it edge iterator
+     * @return set of edges
+     */
+    private static <E, L> List<DirectedEdge<L, E>> edgeIteratorToDirectedEdgeList(Iterator<Edge<L, E>> it) {
+        List<DirectedEdge<L, E>> result = new LinkedList<>();
+
+        while (it.hasNext()) {
+            result.insertEnd((DirectedEdge<L, E>) it.next());
+        }
+
+        return result;
     }
 
     /**
@@ -244,6 +244,6 @@ public final class GraphUtils {
                 return entry;
             }
         }
-        return null;
+        throw new NullPointerException("No entry found for " + vertex);
     }
 }

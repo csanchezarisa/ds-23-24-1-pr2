@@ -74,17 +74,9 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         final Port dstPort = Optional.ofNullable(getPort(arrivalPort))
                 .orElseThrow(DstPortNotFoundException::new);
 
-        if (Utils.anyMatch(routes.values(), r -> r.getDstPort().equals(dstPort) && r.getSrcPort().equals(srcPort))) {
+        if (Utils.anyMatch(srcPort.routesOrigin(), r -> r.getDstPort().equals(dstPort))) {
             throw new RouteAlreadyExistException();
         }
-
-
-        var srcVertex = portsNetwork.getVertex(srcPort);
-        var dstVertex = portsNetwork.getVertex(dstPort);
-
-        // Remove the edge if exists
-        Optional.ofNullable(portsNetwork.getEdge(srcVertex, dstVertex))
-                .ifPresent(edge -> portsNetwork.deleteEdge(edge));
 
         Route route = getRoute(id);
         if (route == null) {
@@ -104,8 +96,12 @@ public class ShippingLinePR2Impl implements ShippingLinePR2 {
         }
         srcPort.addRoute(route);
 
-        // Create the new edge
-        var edge = portsNetwork.newEdge(srcVertex, dstVertex);
+        // Get or create the new edge
+        var srcVertex = portsNetwork.getVertex(srcPort);
+        var dstVertex = portsNetwork.getVertex(dstPort);
+
+        var edge = Optional.ofNullable(portsNetwork.getEdge(srcVertex, dstVertex))
+                .orElseGet(() -> portsNetwork.newEdge(srcVertex, dstVertex));
         edge.setLabel(route);
     }
 
